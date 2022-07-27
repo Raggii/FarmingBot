@@ -30,10 +30,12 @@ False
 
 def CheckTransition():
     found = False
-    realComp = cv.imread(cv.samples.findFile("Assets/Transition.jpg"))
+    realComp = cv.imread(cv.samples.findFile(
+        "FarmingBot/Assets/Transition.jpg"))
 
     grabTransition()
-    testComp = cv.imread(cv.samples.findFile("Assets/CompTrans.jpg"))
+    testComp = cv.imread(cv.samples.findFile(
+        "FarmingBot/Assets/CompTrans.jpg"))
 
     while(not found):
         errorL2 = cv.norm(realComp, testComp, cv.NORM_L2)
@@ -44,22 +46,29 @@ def CheckTransition():
             found = True
         else:
             grabTransition()
-            testComp = cv.imread(cv.samples.findFile("Assets/CompTrans.jpg"))
+            testComp = cv.imread(cv.samples.findFile(
+                "FarmingBot/Assets/CompTrans.jpg"))
 
 
 def itemDropped():
 
     found = False
     realComp = []
-    realComp.append(cv.imread(cv.samples.findFile("Assets/Drop0.jpg")))
-    realComp.append(cv.imread(cv.samples.findFile("Assets/Drop1.jpg")))
-    realComp.append(cv.imread(cv.samples.findFile("Assets/Drop2.jpg")))
-    realComp.append(cv.imread(cv.samples.findFile("Assets/Drop3.jpg")))
-    realComp.append(cv.imread(cv.samples.findFile("Assets/Drop4.jpg")))
-    realComp.append(cv.imread(cv.samples.findFile("Assets/Drop5.jpg")))
+    realComp.append(
+        cv.imread(cv.samples.findFile("FarmingBot/Assets/Drop0.jpg")))
+    realComp.append(
+        cv.imread(cv.samples.findFile("FarmingBot/Assets/Drop1.jpg")))
+    realComp.append(
+        cv.imread(cv.samples.findFile("FarmingBot/Assets/Drop2.jpg")))
+    realComp.append(
+        cv.imread(cv.samples.findFile("FarmingBot/Assets/Drop3.jpg")))
+    realComp.append(
+        cv.imread(cv.samples.findFile("FarmingBot/Assets/Drop4.jpg")))
+    realComp.append(
+        cv.imread(cv.samples.findFile("FarmingBot/Assets/Drop5.jpg")))
 
     grabDrop()
-    testComp = cv.imread(cv.samples.findFile("Assets/CompDrop.jpg"))
+    testComp = cv.imread(cv.samples.findFile("FarmingBot/Assets/CompDrop.jpg"))
 
     for comparison in realComp:
         errorL2 = cv.norm(comparison, testComp, cv.NORM_L2)
@@ -73,19 +82,19 @@ def itemDropped():
 
 def grabDrop():
     pic = ImageGrab.grab(bbox=(0, 960, 150, 1100))
-    pic.save("Assets/CompDrop.jpg")
+    pic.save("FarmingBot/Assets/CompDrop.jpg")
     time.sleep(0.2)
 
 
 def grabTransition():
     pic = ImageGrab.grab(bbox=(500, 500, 800, 800))
-    pic.save("Assets/CompTrans.jpg")
+    pic.save("FarmingBot/Assets/CompTrans.jpg")
     time.sleep(0.2)
 
 
 def grabExit():
     pic = ImageGrab.grab(bbox=(800, 200, 1000, 400))
-    pic.save("Assets/CompExit.jpg")
+    pic.save("FarmingBot/Assets/CompExit.jpg")
     time.sleep(0.2)
 
 
@@ -96,26 +105,8 @@ def Rotate90Degrees():
 # Merge these when numbers are locked
 
 
-def Rotate4SpotDegrees():
-    pyautogui.moveTo(1200, 800)
-    pyautogui.drag(50, 0, .6, button='right')
-    MoveOneStep(2.2)
-
-
-def Rotate3SpotDegrees():
-    pyautogui.moveTo(1200, 800)
-    pyautogui.drag(70, 0, .6, button='right')
-
-
-def Rotate2SpotDegrees():
-    pyautogui.moveTo(1200, 800)
-    pyautogui.drag(95, 0, .6, button='right')
-
-
-def Rotate1SpotDegrees():
-    pyautogui.moveTo(1200, 800)
-    pyautogui.drag(113, 0, .6, button='right')
-    MoveOneStep(2.1)
+""" Before Battle. have to move backwards and move mouse to click on team up
+"""
 
 
 def MoveOneStep(delay):
@@ -128,8 +119,46 @@ def MoveOneStep(delay):
     time.sleep(delay)
 
 
-""" Before Battle. have to move backwards and move mouse to click on team up
-"""
+def RotateAndMove(input):
+    pyautogui.moveTo(1200, 800)
+    pyautogui.drag(input, 0, .6, button='right')
+    MoveOneStep(2.1)
+
+
+def LeaveRoom():
+
+    realComp = []
+    realComp.append(
+        cv.imread(cv.samples.findFile("FarmingBot/Assets/Exit1.jpg")))
+    realComp.append(
+        cv.imread(cv.samples.findFile("FarmingBot/Assets/Exit2.jpg")))
+    realComp.append(
+        cv.imread(cv.samples.findFile("FarmingBot/Assets/Exit3.jpg")))
+    realComp.append(
+        cv.imread(cv.samples.findFile("FarmingBot/Assets/Exit4.jpg")))
+
+    grabExit()
+    testComp = cv.imread(cv.samples.findFile("FarmingBot/Assets/CompExit.jpg"))
+    counter = 0
+    for comparison in realComp:
+        errorL2 = cv.norm(comparison, testComp, cv.NORM_L2)
+        similarity = 1 - errorL2 / (150 * 140)
+        print('Similarity = ', similarity)
+        if(similarity > 0.7):
+            if(counter == 0):
+                RotateAndMove(113)
+                return True
+            elif(counter == 1):
+                RotateAndMove(95)
+                return True
+            elif(counter == 2):
+                RotateAndMove(70)
+                return True
+            elif(counter == 3):
+                RotateAndMove(50)
+                return True
+        counter += 1
+    return False
 
 
 def TeamUp():
@@ -182,15 +211,13 @@ def ThirdState(currentState):
     return currentState
 
 
-def ForthState():
-
-    # grabExit()
+def ForthState(currentState):
     # grabDrop()
-    Rotate4SpotDegrees()
-    MoveOneStep(2.1)
-    # time.sleep(10)
-    currentState = StateMachine.First
-    pass
+    found = False
+    found = LeaveRoom()
+    if(found):
+        currentState = StateMachine.First
+    return currentState
 
 
 def main():
@@ -213,7 +240,7 @@ def main():
             # break
         elif(currentState == StateMachine.Forth):
             print("In Forth State")
-            ForthState()
+            currentState = ForthState(currentState)
             # break
         time.sleep(5)
 
