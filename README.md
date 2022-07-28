@@ -3,11 +3,11 @@ A bot to help with menial tasks in a game
 
 
 TODO
-Scroll out when starting \\
-add functionality to click boost damage cards to decrease time of battles.//
-Remove unneeded Exits due to scrolling errors//
-Add a Watch dog timer to stop the program if un responsive//
-    - Make this give stats on last position to a Txt file so we can debug it//
+Scroll out when starting \n
+add functionality to click boost damage cards to decrease time of battles.\n
+Remove unneeded Exits due to scrolling errors\n
+Add a Watch dog timer to stop the program if un responsive\n
+    - Make this give stats on last position to a Txt file so we can debug it\n
 Add functionallity into stage one that checks for health and mana//
    - If low then clicks poition or just runs outside and gets health and mana that way//
 Change running times when exiting the level sometimes it will just run right outside of the battle//
