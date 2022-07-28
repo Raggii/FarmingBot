@@ -3,7 +3,7 @@ A bot to help with menial tasks in a game
 
 
 TODO
-Scroll out when starting /n
+Scroll out when starting <br />
 add functionality to click boost damage cards to decrease time of battles./n
 Remove unneeded Exits due to scrolling errors\n
 Add a Watch dog timer to stop the program if un responsive\n
