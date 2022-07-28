@@ -31,78 +31,65 @@ False
 def CheckTransition():
     found = False
     realComp = cv.imread(cv.samples.findFile(
-        "FarmingBot/Assets/Transition.jpg"))
+        "Assets/Transition.jpg"))
 
     grabTransition()
     testComp = cv.imread(cv.samples.findFile(
-        "FarmingBot/Assets/CompTrans.jpg"))
+        "Assets/CompTrans.jpg"))
 
     while(not found):
         errorL2 = cv.norm(realComp, testComp, cv.NORM_L2)
         similarity = 1 - errorL2 / (150 * 140)
-        print('Similarity = ', similarity)
+        #print('Similarity = ', similarity)
         if(similarity > 0.7):
             print("FOUND!")
             found = True
         else:
             grabTransition()
             testComp = cv.imread(cv.samples.findFile(
-                "FarmingBot/Assets/CompTrans.jpg"))
+                "Assets/CompTrans.jpg"))
 
 
-def itemDropped():
-
-    found = False
-    realComp = []
-    realComp.append(
-        cv.imread(cv.samples.findFile("FarmingBot/Assets/Drop0.jpg")))
-    realComp.append(
-        cv.imread(cv.samples.findFile("FarmingBot/Assets/Drop1.jpg")))
-    realComp.append(
-        cv.imread(cv.samples.findFile("FarmingBot/Assets/Drop2.jpg")))
-    realComp.append(
-        cv.imread(cv.samples.findFile("FarmingBot/Assets/Drop3.jpg")))
-    realComp.append(
-        cv.imread(cv.samples.findFile("FarmingBot/Assets/Drop4.jpg")))
-    realComp.append(
-        cv.imread(cv.samples.findFile("FarmingBot/Assets/Drop5.jpg")))
-
+def itemDropCircle():
     grabDrop()
-    testComp = cv.imread(cv.samples.findFile("FarmingBot/Assets/CompDrop.jpg"))
+    img = cv.imread('Assets/CompDrop.jpg', 0)
 
-    for comparison in realComp:
-        errorL2 = cv.norm(comparison, testComp, cv.NORM_L2)
-        similarity = 1 - errorL2 / (150 * 140)
-        print('Similarity = ', similarity)
-        if(similarity > 0.7):
-            print("Battle END!")
-            return True
-    return False
+    img = cv.medianBlur(img, 5)
+    circles = [None]
+    circles.append(cv.HoughCircles(img, cv.HOUGH_GRADIENT, 1, 20,
+                                   param1=50, param2=30, minRadius=70, maxRadius=240))
+
+    try:
+        if(circles[1] != None):
+            print("Good")
+        else:
+            return False
+    # if value error caught then we cant index into the list which means the list exists!
+    except ValueError:
+        return True
 
 
 def grabDrop():
     pic = ImageGrab.grab(bbox=(0, 960, 150, 1100))
-    pic.save("FarmingBot/Assets/CompDrop.jpg")
+    pic.save("Assets/CompDrop.jpg")
     time.sleep(0.2)
 
 
 def grabTransition():
     pic = ImageGrab.grab(bbox=(500, 500, 800, 800))
-    pic.save("FarmingBot/Assets/CompTrans.jpg")
+    pic.save("Assets/CompTrans.jpg")
     time.sleep(0.2)
 
 
 def grabExit():
     pic = ImageGrab.grab(bbox=(800, 200, 1000, 400))
-    pic.save("FarmingBot/Assets/CompExit.jpg")
+    pic.save("Assets/CompExit.jpg")
     time.sleep(0.2)
 
 
 def Rotate90Degrees():
-    pyautogui.moveTo(1200, 800)
+    pyautogui.moveTo(1200, 10)
     pyautogui.drag(80, 0, .6, button='right')
-
-# Merge these when numbers are locked
 
 
 """ Before Battle. have to move backwards and move mouse to click on team up
@@ -129,21 +116,25 @@ def LeaveRoom():
 
     realComp = []
     realComp.append(
-        cv.imread(cv.samples.findFile("FarmingBot/Assets/Exit1.jpg")))
+        cv.imread(cv.samples.findFile("Assets/Exit1.jpg")))
     realComp.append(
-        cv.imread(cv.samples.findFile("FarmingBot/Assets/Exit2.jpg")))
+        cv.imread(cv.samples.findFile("Assets/Exit2.jpg")))
     realComp.append(
-        cv.imread(cv.samples.findFile("FarmingBot/Assets/Exit3.jpg")))
+        cv.imread(cv.samples.findFile("Assets/Exit3.jpg")))
     realComp.append(
-        cv.imread(cv.samples.findFile("FarmingBot/Assets/Exit4.jpg")))
+        cv.imread(cv.samples.findFile("Assets/Exit4.jpg")))
+    realComp.append(
+        cv.imread(cv.samples.findFile("Assets/Exit3Test.jpg")))
+    realComp.append(
+        cv.imread(cv.samples.findFile("Assets/Exit4Test.jpg")))
 
     grabExit()
-    testComp = cv.imread(cv.samples.findFile("FarmingBot/Assets/CompExit.jpg"))
+    testComp = cv.imread(cv.samples.findFile("Assets/CompExit.jpg"))
     counter = 0
     for comparison in realComp:
         errorL2 = cv.norm(comparison, testComp, cv.NORM_L2)
         similarity = 1 - errorL2 / (150 * 140)
-        print('Similarity = ', similarity)
+        #print('Similarity = ', similarity)
         if(similarity > 0.7):
             if(counter == 0):
                 RotateAndMove(113)
@@ -155,6 +146,12 @@ def LeaveRoom():
                 RotateAndMove(70)
                 return True
             elif(counter == 3):
+                RotateAndMove(50)
+                return True
+            elif(counter == 4):
+                RotateAndMove(70)
+                return True
+            elif(counter == 5):
                 RotateAndMove(50)
                 return True
         counter += 1
@@ -200,7 +197,7 @@ side. Indicating that we have gotten items from the battle """
 
 def ThirdState(currentState):
 
-    if(itemDropped()):
+    if(itemDropCircle()):
         currentState = StateMachine.Forth
     else:
         xCoord = 1075
@@ -221,7 +218,9 @@ def ForthState(currentState):
 
 
 def main():
-    currentState = StateMachine.Forth
+    counter = 0
+    start = time.time()
+    currentState = StateMachine.First
     time.sleep(5)
     while(True):
         # check for if the F7 key is pressed when pressed start and stop the program
@@ -233,6 +232,12 @@ def main():
         elif(currentState == StateMachine.Second):
             print("In Second State")
             currentState = SecondState(currentState)
+            end = time.time()
+            print(
+                "\n\n\nTimes Killed = {}\nTime for Kill {:.2f} -------------------------\n\n\n".format(counter, end - start))
+            counter += 1
+            start = time.time()
+
             # break
         elif(currentState == StateMachine.Third):
             print("In Third State")
@@ -246,3 +251,21 @@ def main():
 
 
 main()
+
+
+# TODO
+# Scroll out when starting
+# add functionality to click boost damage cards to decrease time of battles.
+# Remove unneeded Exits due to scrolling errors
+# Add a Watch dog timer to stop the program if un responsive
+#    - Make this give stats on last position to a Txt file so we can debug it
+# Add functionallity into stage one that checks for health and mana
+#    - If low then clicks poition or just runs outside and gets health and mana that way
+# Change running times when exiting the level sometimes it will just run right outside of the battle
+# also add a catch in state 4 that checks if the player has moved from the room yet
+#    - add a transition checker and if not triggered then try movement again
+# Add functionality to start the program using the F7 key while in game
+#    - This could also be used to pause the program
+# add stats for each of the states to get an idea of how long the bot is expected to be in each
+# Have an automatically stat generating device that shows the above on a graph.
+# Read from the chat to see if a specific drop has occoured?
