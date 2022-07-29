@@ -51,22 +51,20 @@ def CheckTransition():
 
 
 def itemDropCircle():
-    grabDrop()
-    img = cv.imread('Assets/CompDrop.jpg', 0)
 
-    img = cv.medianBlur(img, 5)
-    circles = [None]
-    circles.append(cv.HoughCircles(img, cv.HOUGH_GRADIENT, 1, 20,
-                                   param1=50, param2=30, minRadius=70, maxRadius=240))
+    grabBook()
+    book = cv.imread('Assets/CompBook.jpg', 0)
+    bookReal = cv.imread('Assets/Book.jpg', 0)
 
-    try:
-        if(circles[1] != None):
-            print("Good")
-        else:
-            return False
-    # if value error caught then we cant index into the list which means the list exists!
-    except ValueError:
+    errorL2 = cv.norm(book, bookReal, cv.NORM_L2)
+    similarity = 1 - errorL2 / (150 * 140)
+    print('Similarity = ', similarity)
+    if(similarity > 0.9):
+        print("FOUND!")
         return True
+    else:
+        return False
+    # if value error caught then we cant index into the list which means the list exists!
 
 
 def grabDrop():
@@ -84,6 +82,12 @@ def grabTransition():
 def grabExit():
     pic = ImageGrab.grab(bbox=(800, 200, 1000, 400))
     pic.save("Assets/CompExit.jpg")
+    time.sleep(0.2)
+
+
+def grabBook():
+    pic = ImageGrab.grab(bbox=(2400, 1250, 2475, 1400))
+    pic.save("Assets/CompBook.jpg")
     time.sleep(0.2)
 
 
@@ -110,6 +114,11 @@ def RotateAndMove(input):
     pyautogui.moveTo(1200, 800)
     pyautogui.drag(input, 0, .6, button='right')
     MoveOneStep(2.1)
+
+
+def Rotate(input):
+    pyautogui.moveTo(1200, 800)
+    pyautogui.drag(input, 0, .6, button='right')
 
 
 def LeaveRoom():
@@ -168,6 +177,28 @@ def TeamUp():
     pyautogui.click()
 
 
+def getMana():
+    MoveOneStep(0.5)
+    Rotate(-22)
+    MoveOneStep(5.8)
+    Rotate(-8)
+    MoveOneStep(0.9)
+    time.sleep(5)
+    Rotate(-11)
+    MoveOneStep(1.5)
+    time.sleep(20)
+    Rotate(85)
+    MoveOneStep(2)
+    time.sleep(5)
+    Rotate(35)
+    MoveOneStep(1)
+    Rotate(-15)
+    MoveOneStep(4.5)
+    Rotate(15)
+    MoveOneStep(0.5)
+    Rotate(100)
+
+
 def FirstState(currentState):
     # move backwards 5 times
 
@@ -189,6 +220,7 @@ def SecondState(currentState):
     MoveOneStep(2)
     currentState = StateMachine.Third
     return currentState
+    #
 
 
 """ In Battle. Click in 1 spot to use attack card until circles come up on the 
@@ -209,7 +241,7 @@ def ThirdState(currentState):
 
 
 def ForthState(currentState):
-    # grabDrop()
+    # grabBook()
     found = False
     found = LeaveRoom()
     if(found):
@@ -218,7 +250,7 @@ def ForthState(currentState):
 
 
 def main():
-    counter = 0
+    counter = 1
     start = time.time()
     currentState = StateMachine.First
     time.sleep(5)
@@ -227,6 +259,8 @@ def main():
         # keyboard.is_pressed('f7')
         if(currentState == StateMachine.First):
             print("In First State")
+            if(counter % 60 == 0):
+                getMana()
             currentState = FirstState(currentState)
             # break
         elif(currentState == StateMachine.Second):
@@ -234,7 +268,7 @@ def main():
             currentState = SecondState(currentState)
             end = time.time()
             print(
-                "\n\n\nTimes Killed = {}\nTime for Kill {:.2f} -------------------------\n\n\n".format(counter, end - start))
+                "\n\n\nTimes Killed = {}\nTime for Kill {:.2f} -------------------------\n\n\n".format(counter - 1, end - start))
             counter += 1
             start = time.time()
 
@@ -248,6 +282,13 @@ def main():
             currentState = ForthState(currentState)
             # break
         time.sleep(5)
+        endError = time.time()
+        print(endError - start)
+        if((endError - start) > 700):
+            print("Code stalled -----------------------------------------")
+            pic = ImageGrab.grab(bbox=(0, 0, 2500, 1500))
+            pic.save("Assets/ERROR_REPORT.jpg")
+            break
 
 
 main()
