@@ -1,12 +1,10 @@
+from cv2 import LINE_8
 import pyautogui
 import time
 from PIL import ImageGrab
 
-import numpy as np
 import cv2 as cv
 
-import os
-import sys
 
 # state machine 4 states
 
@@ -35,59 +33,58 @@ def CheckTransition():
 
     grabTransition()
     testComp = cv.imread(cv.samples.findFile(
-        "Assets/CompTrans.jpg"))
+        "Assets/Comp/CompTrans.jpg"))
 
-    while(not found):
-        errorL2 = cv.norm(realComp, testComp, cv.NORM_L2)
-        similarity = 1 - errorL2 / (150 * 140)
-        #print('Similarity = ', similarity)
-        if(similarity > 0.7):
-            print("FOUND!")
-            found = True
-        else:
-            grabTransition()
-            testComp = cv.imread(cv.samples.findFile(
-                "Assets/CompTrans.jpg"))
+    errorL2 = cv.norm(realComp, testComp, cv.NORM_L2)
+    similarity = 1 - errorL2 / (150 * 140)
+    # If it finds transition then loops until its found
+    if(similarity > 0.7):
+        print("\n-------Transition Period Found ------- \n")
+        while(not found):
+            time.sleep(0.5)
+            errorL2 = cv.norm(realComp, testComp, cv.NORM_L2)
+            similarity = 1 - errorL2 / (150 * 140)
+            if(similarity < 0.7):
+                print("------- Transition Period Over -------\n")
+                found = True
+            else:
+                grabTransition()
+                testComp = cv.imread(cv.samples.findFile(
+                    "Assets/Comp/CompTrans.jpg"))
+    return found
 
 
 def itemDropCircle():
 
     grabBook()
-    book = cv.imread('Assets/CompBook.jpg', 0)
+    book = cv.imread('Assets/Comp/CompBook.jpg', 0)
     bookReal = cv.imread('Assets/Book.jpg', 0)
 
     errorL2 = cv.norm(book, bookReal, cv.NORM_L2)
     similarity = 1 - errorL2 / (150 * 140)
-    print('Similarity = ', similarity)
     if(similarity > 0.9):
-        print("FOUND!")
+        print("Found Battle Exit Condition")
         return True
     else:
         return False
     # if value error caught then we cant index into the list which means the list exists!
 
 
-def grabDrop():
-    pic = ImageGrab.grab(bbox=(0, 960, 150, 1100))
-    pic.save("Assets/CompDrop.jpg")
-    time.sleep(0.2)
-
-
 def grabTransition():
     pic = ImageGrab.grab(bbox=(500, 500, 800, 800))
-    pic.save("Assets/CompTrans.jpg")
+    pic.save("Assets/Comp/CompTrans.jpg")
     time.sleep(0.2)
 
 
 def grabExit():
     pic = ImageGrab.grab(bbox=(800, 200, 1000, 400))
-    pic.save("Assets/CompExit.jpg")
+    pic.save("Assets/Comp/CompExit.jpg")
     time.sleep(0.2)
 
 
 def grabBook():
     pic = ImageGrab.grab(bbox=(2400, 1250, 2475, 1400))
-    pic.save("Assets/CompBook.jpg")
+    pic.save("Assets/Comp/CompBook.jpg")
     time.sleep(0.2)
 
 
@@ -125,43 +122,48 @@ def LeaveRoom():
 
     realComp = []
     realComp.append(
-        cv.imread(cv.samples.findFile("Assets/Exit1.jpg")))
+        cv.imread(cv.samples.findFile("Assets/Exit/Exit1.jpg")))
     realComp.append(
-        cv.imread(cv.samples.findFile("Assets/Exit2.jpg")))
+        cv.imread(cv.samples.findFile("Assets/Exit/Exit2.jpg")))
     realComp.append(
-        cv.imread(cv.samples.findFile("Assets/Exit3.jpg")))
+        cv.imread(cv.samples.findFile("Assets/Exit/Exit3.jpg")))
     realComp.append(
-        cv.imread(cv.samples.findFile("Assets/Exit4.jpg")))
+        cv.imread(cv.samples.findFile("Assets/Exit/Exit4.jpg")))
     realComp.append(
-        cv.imread(cv.samples.findFile("Assets/Exit3Test.jpg")))
+        cv.imread(cv.samples.findFile("Assets/Exit/Exit3Test.jpg")))
     realComp.append(
-        cv.imread(cv.samples.findFile("Assets/Exit4Test.jpg")))
+        cv.imread(cv.samples.findFile("Assets/Exit/Exit4Test.jpg")))
 
     grabExit()
-    testComp = cv.imread(cv.samples.findFile("Assets/CompExit.jpg"))
+    testComp = cv.imread(cv.samples.findFile("Assets/Comp/CompExit.jpg"))
     counter = 0
     for comparison in realComp:
         errorL2 = cv.norm(comparison, testComp, cv.NORM_L2)
-        similarity = 1 - errorL2 / (150 * 140)
-        #print('Similarity = ', similarity)
-        if(similarity > 0.7):
+        similarity = 1 - errorL2 / (200 * 200)
+        if(similarity > 0.75):
             if(counter == 0):
-                RotateAndMove(113)
+                Rotate(113)
+                print("Found Exit Number 1")
                 return True
             elif(counter == 1):
-                RotateAndMove(95)
+                Rotate(95)
+                print("Found Exit Number 2")
                 return True
             elif(counter == 2):
-                RotateAndMove(70)
+                Rotate(70)
+                print("Found Exit Number 3")
                 return True
             elif(counter == 3):
-                RotateAndMove(50)
+                Rotate(50)
+                print("Found Exit Number 4")
                 return True
             elif(counter == 4):
-                RotateAndMove(70)
+                Rotate(70)
+                print("Found Exit Number 3 Test")
                 return True
             elif(counter == 5):
-                RotateAndMove(50)
+                Rotate(50)
+                print("Found Exit Number 4 Test")
                 return True
         counter += 1
     return False
@@ -178,6 +180,7 @@ def TeamUp():
 
 
 def getMana():
+    print("------- OBTAINING MANA STAND BY -------")
     MoveOneStep(0.5)
     Rotate(-22)
     MoveOneStep(5.8)
@@ -186,7 +189,7 @@ def getMana():
     time.sleep(5)
     Rotate(-11)
     MoveOneStep(1.5)
-    time.sleep(20)
+    time.sleep(45)
     Rotate(85)
     MoveOneStep(2)
     time.sleep(5)
@@ -197,16 +200,137 @@ def getMana():
     Rotate(15)
     MoveOneStep(0.5)
     Rotate(100)
+    print("------- OBTAINING MANA COMPLETED -------\n")
+    print("--------------- RESETTING --------------\n")
+
+
+def grabCards():
+    pic = ImageGrab.grab(bbox=(0, 0, 1780, 810))
+    pic.save("Assets/Comp/CompCards.jpg")
+    time.sleep(0.2)
+
+
+def MoveToPower():
+
+    grabCards()
+    grayCards = cv.cvtColor(cv.imread(cv.samples.findFile(
+        "Assets/Comp/CompCards.jpg")), cv.COLOR_BGR2GRAY)
+
+    PowerUp = cv.imread(cv.samples.findFile("Assets/Battle/PowerUp.jpg"))
+    grayPowerUp = cv.cvtColor(PowerUp, cv.COLOR_BGR2GRAY)
+    resultPower = cv.matchTemplate(grayCards, grayPowerUp, cv.TM_CCOEFF)
+    min_val, max_val, min_loc, max_loc = cv.minMaxLoc(resultPower)
+    pyautogui.moveTo(max_loc[0],  max_loc[1])
+    time.sleep(1)
+    pyautogui.click()
+
+    pyautogui.moveTo(1000, 50)
+    pyautogui.drag(50, 0, .6, button='right')
+
+
+def MoveToDamage():
+
+    grabCards()
+    grayCards = cv.cvtColor(cv.imread(cv.samples.findFile(
+        "Assets/Comp/CompCards.jpg")), cv.COLOR_BGR2GRAY)
+
+    Damage = cv.imread(cv.samples.findFile("Assets/Battle/Damage.jpg"))
+
+    GreyDamage = cv.cvtColor(Damage, cv.COLOR_BGR2GRAY)
+
+    resultPower = cv.matchTemplate(grayCards, GreyDamage, cv.TM_CCOEFF)
+    min_val, max_val, min_loc, max_loc = cv.minMaxLoc(resultPower)
+
+    pyautogui.moveTo(max_loc[0] + 20,  max_loc[1] + 20)
+    time.sleep(1)
+    pyautogui.click()
+    pyautogui.moveTo(1000, 50)
+    pyautogui.drag(50, 0, .6, button='right')
+
+
+def MoveToRealCard():
+    grabCards()
+    grayCards = cv.cvtColor(cv.imread(cv.samples.findFile(
+        "Assets/Comp/CompCards.jpg")), cv.COLOR_BGR2GRAY)
+    DamageReal = cv.imread(cv.samples.findFile("Assets/Battle/DamageReal.jpg"))
+
+    GreyDamageReal = cv.cvtColor(DamageReal, cv.COLOR_BGR2GRAY)
+
+    resultReal = cv.matchTemplate(grayCards, GreyDamageReal, cv.TM_CCOEFF)
+    min_val, max_val, min_loc, max_loc = cv.minMaxLoc(resultReal)
+
+    pyautogui.moveTo(max_loc[0] + 20,  max_loc[1] + 20)
+    time.sleep(1)
+    pyautogui.click()
+
+
+def SelectCards():
+
+    MoveToPower()
+    time.sleep(0.5)
+    MoveToDamage()
+    time.sleep(0.5)
+    MoveToRealCard()
+
+
+def grabOddCard():
+    pic = ImageGrab.grab(bbox=(1300, 660, 1380, 780))
+    pic.save("Assets/Comp/CompOddCard.jpg")
+    time.sleep(0.2)
+
+
+def grabEvenCard():
+    pic = ImageGrab.grab(bbox=(1250, 660, 1330, 780))
+    pic.save("Assets/Comp/CompEvenCard.jpg")
+    time.sleep(0.2)
+
+
+def cardsExist():
+
+    grabOddCard()
+    testOdd = cv.imread(cv.samples.findFile("Assets/Comp/CompOddCard.jpg"))
+
+    realOdd = []
+    realOdd.append(
+        cv.imread(cv.samples.findFile("Assets/Battle/OddDamage.jpg")))
+    realOdd.append(
+        cv.imread(cv.samples.findFile("Assets/Battle/OddPowerUp.jpg")))
+
+    for comparison in realOdd:
+        errorL2 = cv.norm(comparison, testOdd, cv.NORM_L2)
+        similarity = 1 - errorL2 / (200 * 200)
+        if(similarity > 0.85):
+            print("Found Odd Card Set")
+            return True
+
+    grabEvenCard()
+    testEven = cv.imread(cv.samples.findFile("Assets/Comp/CompEvenCard.jpg"))
+
+    realEven = []
+    realEven.append(
+        cv.imread(cv.samples.findFile("Assets/Battle/EvenDamage.jpg")))
+    realEven.append(
+        cv.imread(cv.samples.findFile("Assets/Battle/EvenPowerUp.jpg")))
+
+    for comparison in realEven:
+        errorL2 = cv.norm(comparison, testEven, cv.NORM_L2)
+        similarity = 1 - errorL2 / (200 * 200)
+        if(similarity > 0.85):
+            print("Found Odd Card Set")
+            return True
+
+    return False
 
 
 def FirstState(currentState):
     # move backwards 5 times
-
+    found = False
     Rotate90Degrees()
     MoveOneStep(0.2)
-    time.sleep(0.3)
+    time.sleep(0.8)
     TeamUp()
-    CheckTransition()
+    while(not found):
+        found = CheckTransition()
     currentState = StateMachine.Second
     return currentState
 
@@ -220,7 +344,6 @@ def SecondState(currentState):
     MoveOneStep(2)
     currentState = StateMachine.Third
     return currentState
-    #
 
 
 """ In Battle. Click in 1 spot to use attack card until circles come up on the 
@@ -232,10 +355,9 @@ def ThirdState(currentState):
     if(itemDropCircle()):
         currentState = StateMachine.Forth
     else:
-        xCoord = 1075
-        yCoord = 730
-        pyautogui.moveTo(xCoord, yCoord)
-        pyautogui.click()
+        if(cardsExist()):
+
+            SelectCards()
 
     return currentState
 
@@ -243,23 +365,44 @@ def ThirdState(currentState):
 def ForthState(currentState):
     # grabBook()
     found = False
+    foundTrans = False
+    # Finds room location and rotates to exit of room
     found = LeaveRoom()
+
     if(found):
+        while(not foundTrans):
+            MoveOneStep(0.75)
+            foundTrans = CheckTransition()
+            time.sleep(0.25)
         currentState = StateMachine.First
     return currentState
+
+
+def CountDown():
+    print("Application Starting, Countdown 5")
+    time.sleep(1)
+    print("4")
+    time.sleep(1)
+    print("3")
+    time.sleep(1)
+    print("2")
+    time.sleep(1)
+    print("1")
+    time.sleep(1)
+    print("--------- Successful Lauch ---------")
 
 
 def main():
     counter = 1
     start = time.time()
     currentState = StateMachine.First
-    time.sleep(5)
+    CountDown()
     while(True):
         # check for if the F7 key is pressed when pressed start and stop the program
         # keyboard.is_pressed('f7')
         if(currentState == StateMachine.First):
             print("In First State")
-            if(counter % 60 == 0):
+            if(counter % 25 == 0):
                 getMana()
             currentState = FirstState(currentState)
             # break
@@ -281,9 +424,9 @@ def main():
             print("In Forth State")
             currentState = ForthState(currentState)
             # break
-        time.sleep(5)
+        time.sleep(3.5)
         endError = time.time()
-        print(endError - start)
+        print("Time Since Last Kill = {:.2f}".format(endError - start))
         if((endError - start) > 700):
             print("Code stalled -----------------------------------------")
             pic = ImageGrab.grab(bbox=(0, 0, 2500, 1500))
@@ -296,17 +439,6 @@ main()
 
 # TODO
 # Scroll out when starting
-# add functionality to click boost damage cards to decrease time of battles.
-# Remove unneeded Exits due to scrolling errors
-# Add a Watch dog timer to stop the program if un responsive
-#    - Make this give stats on last position to a Txt file so we can debug it
-# Add functionallity into stage one that checks for health and mana
-#    - If low then clicks poition or just runs outside and gets health and mana that way
-# Change running times when exiting the level sometimes it will just run right outside of the battle
-# also add a catch in state 4 that checks if the player has moved from the room yet
-#    - add a transition checker and if not triggered then try movement again
 # Add functionality to start the program using the F7 key while in game
 #    - This could also be used to pause the program
-# add stats for each of the states to get an idea of how long the bot is expected to be in each
-# Have an automatically stat generating device that shows the above on a graph.
-# Read from the chat to see if a specific drop has occoured?
+# Put all assests into specific files for easy to navigate code
