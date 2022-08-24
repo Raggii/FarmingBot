@@ -5,6 +5,7 @@ from PIL import ImageGrab
 
 import cv2 as cv
 
+import sys
 
 # state machine 4 states
 
@@ -41,10 +42,10 @@ def CheckTransition():
     if(similarity > 0.7):
         print("\n-------Transition Period Found ------- \n")
         while(not found):
-            time.sleep(0.5)
+            time.sleep(0.1)
             errorL2 = cv.norm(realComp, testComp, cv.NORM_L2)
             similarity = 1 - errorL2 / (150 * 140)
-            if(similarity < 0.7):
+            if(similarity < 0.9):
                 print("------- Transition Period Over -------\n")
                 found = True
             else:
@@ -77,7 +78,7 @@ def grabTransition():
 
 
 def grabExit():
-    pic = ImageGrab.grab(bbox=(800, 200, 1000, 400))
+    pic = ImageGrab.grab(bbox=(1200, 0, 1400, 200))
     pic.save("Assets/Comp/CompExit.jpg")
     time.sleep(0.2)
 
@@ -129,10 +130,6 @@ def LeaveRoom():
         cv.imread(cv.samples.findFile("Assets/Exit/Exit3.jpg")))
     realComp.append(
         cv.imread(cv.samples.findFile("Assets/Exit/Exit4.jpg")))
-    realComp.append(
-        cv.imread(cv.samples.findFile("Assets/Exit/Exit3Test.jpg")))
-    realComp.append(
-        cv.imread(cv.samples.findFile("Assets/Exit/Exit4Test.jpg")))
 
     grabExit()
     testComp = cv.imread(cv.samples.findFile("Assets/Comp/CompExit.jpg"))
@@ -140,12 +137,12 @@ def LeaveRoom():
     for comparison in realComp:
         errorL2 = cv.norm(comparison, testComp, cv.NORM_L2)
         similarity = 1 - errorL2 / (200 * 200)
-        if(similarity > 0.75):
+        if(similarity > 0.85):
             if(counter == 0):
                 Rotate(113)
                 print("Found Exit Number 1")
                 return True
-            elif(counter == 1):
+            if(counter == 1):
                 Rotate(95)
                 print("Found Exit Number 2")
                 return True
@@ -156,14 +153,6 @@ def LeaveRoom():
             elif(counter == 3):
                 Rotate(50)
                 print("Found Exit Number 4")
-                return True
-            elif(counter == 4):
-                Rotate(70)
-                print("Found Exit Number 3 Test")
-                return True
-            elif(counter == 5):
-                Rotate(50)
-                print("Found Exit Number 4 Test")
                 return True
         counter += 1
     return False
@@ -370,16 +359,23 @@ def ForthState(currentState):
     found = LeaveRoom()
 
     if(found):
+        startTime = time.time()
         while(not foundTrans):
-            MoveOneStep(0.75)
+            MoveOneStep(0.5)
             foundTrans = CheckTransition()
-            time.sleep(0.25)
+            time.sleep(1)
+            if((time.time() - startTime) > 100):
+                sys.exit("\n\nWalked to Long\n\n")
         currentState = StateMachine.First
     return currentState
+
+    # grabExit()
+    # return 3
 
 
 def CountDown():
     print("Application Starting, Countdown 5")
+
     time.sleep(1)
     print("4")
     time.sleep(1)
@@ -388,7 +384,9 @@ def CountDown():
     print("2")
     time.sleep(1)
     print("1")
+    pyautogui.scroll(-100000)
     time.sleep(1)
+
     print("--------- Successful Lauch ---------")
 
 
@@ -396,13 +394,14 @@ def main():
     counter = 1
     start = time.time()
     currentState = StateMachine.First
+    # time.sleep(220)
     CountDown()
     while(True):
         # check for if the F7 key is pressed when pressed start and stop the program
         # keyboard.is_pressed('f7')
         if(currentState == StateMachine.First):
             print("In First State")
-            if(counter % 25 == 0):
+            if(counter % 30 == 0):
                 getMana()
             currentState = FirstState(currentState)
             # break
@@ -421,6 +420,7 @@ def main():
             currentState = ThirdState(currentState)
             # break
         elif(currentState == StateMachine.Forth):
+            pyautogui.scroll(-100000)
             print("In Forth State")
             currentState = ForthState(currentState)
             # break
