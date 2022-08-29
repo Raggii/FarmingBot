@@ -5,13 +5,24 @@ import time
 from Modules.FirstState import FirstState
 from Modules.MouseControl import MouseControl
 
+from Modules.PositionIdentifier import PositionIdentifier
+
 
 def main():
-    # FirstState.InitalCountDown(FirstState)
-    # FirstState.CompleteFirstState()
     time.sleep(2)
-    MouseControl.MoveToMultipleLocationsAndClick(
-        MouseControl, [(0.5, 0.5), (0.5, 0.8), (2, 0.5), (0.5, 0.1), (0.2, 1), (-1, 0.5)])
+
+    # PositionIdentifier.ReturnBossPosition()
+    # PositionIdentifier.ReturnPlayerPosition()
+    listOfCards = ["Bot2.0/Assets2.0/Targets/Card0.jpg",
+                   "Bot2.0/Assets2.0/Targets/Card1.jpg",
+                   #    "Bot2.0/Assets2.0/Targets/Card2.jpg",
+                   #    "Bot2.0/Assets2.0/Targets/Card3.jpg",
+                   #    "Bot2.0/Assets2.0/Targets/Card4.jpg",
+                   #    "Bot2.0/Assets2.0/Targets/Card5.jpg"
+                   ]
+
+    for card in listOfCards:
+        PositionIdentifier.ReturnCurrentCard(card)
 
 
 main()
